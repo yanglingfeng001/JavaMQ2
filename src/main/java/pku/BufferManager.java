@@ -5,17 +5,19 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class BufferManager {//封装缓冲区的一些数据和对缓冲区的一些操作
-    private static AtomicLong bufIndex = new AtomicLong();//自增原子long数据
-    private static final int buf_size = 8 << 10;//8*2的10次方骚操作表示 8192 //但是这里队列缓冲区大小是8KB
-    private volatile boolean isFirstGet = true;//为什么这里要使用volatile来修饰？？？？？
+    private static AtomicLong bufIndex = new AtomicLong();//自增原子long数据，属于类的变量而不属于实例，所以所有类只有一个
+    // ，用于指向即将落盘的位置
+    private static final int buf_size = 8 << 10;//8*2的10次方骚操作表示 8192 //但是这里队列缓冲区大小是8KB，常量
+    private volatile boolean isFirstGet = true;//为什么这里要使用volatile来修饰？？？？？，属于实例变量而不是类变量
     //被volatile修饰的变量能够保证每个线程能够获取该变量的最新值，从而避免出现数据脏读的现象。
     private ByteBuffer buffer = ByteBuffer.allocateDirect(buf_size);//给buffer缓冲区分配buf_size大小的内存 8192
     //由于频繁的本地IO所以使用ByteBuffer.allocateDirect()方法
-    private int currentMsgNum = 0;
-    private int bufferMagNum = 0;
-    private Index index = new Index();
+    private int currentMsgNum = 0;//当前队列中的消息数量
+    private int bufferMagNum = 0;//当前队列的缓冲区中的消息数量
+    private Index index = new Index();//每一个队列拥有一个索引
 
-    public void put(byte[] message) {//将byte数组压入缓冲区，这里的message.length是以字节为单位的
+    public synchronized void put(byte[] message) {//将byte数组压入缓冲区，这里的message.length是以字节为单位的
+        //加上synchronized，虽然并不会并发写
         if (message.length + 2 > buffer.remaining()) {//如果超出缓冲区的大小先写入本地磁盘 //但是为什么要加2，
             // 是因为需要写入message.length，是short，short的大小是16位，刚好为2个Byte
             // 应该是和之前的消息隔1位外加写入message.length
@@ -24,12 +26,12 @@ public class BufferManager {//封装缓冲区的一些数据和对缓冲区的�
         }
         buffer.putShort((short) message.length);
         buffer.put(message);//写入信息
-        currentMsgNum++;//
-        bufferMagNum++;//一会儿再看
+        currentMsgNum++;
+        bufferMagNum++;
     }
 
 
-    public synchronized Collection<byte[]> get(long offset, long num) {//读取消息到buffer
+    public synchronized Collection<byte[]> get(long offset, long num) {//读取消息到buffer,可能会并发读
         // 然后从offset开始读取num长度的消息数量（非大小）
         if (isFirstGet) {//是第一次读先把当前缓冲区的消息写入磁盘
             writeToDisk();

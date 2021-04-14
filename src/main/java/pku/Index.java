@@ -42,7 +42,6 @@ class Index {
                     continue;
                 }
                 if (num <= 0)//这里有一个问题，如果num小于0的话，会不会添加的最后一个索引项的位置已经超出了offset+num的界限
-                    // ？？？？有可能会，但是仅仅加入的是索引而不是消息
                     return results;
             }
         }

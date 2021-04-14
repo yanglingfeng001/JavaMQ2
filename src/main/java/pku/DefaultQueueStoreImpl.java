@@ -7,21 +7,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * 这是一个简单的基于内存的实现，以方便选手理解题意；
- * 实际提交时，请维持包名和类名不变，把方法实现修改为自己的内容；
+对于QueueStore的实现
  */
 public class DefaultQueueStoreImpl extends QueueStore {
 
-    public static Collection<byte[]> EMPTY = new ArrayList<>();
-    private static final int FILE_SIZE = 1;
+    public final static Collection<byte[]> EMPTY = new ArrayList<>();//在get函数返回的消息内容为空时返回，可以理解为一个饿汉式的单例
+//    private static final int FILE_SIZE = 1;
     private ConcurrentHashMap<String, BufferManager> bufferManagers;
 
-    private FileChannel[] channels;//FileChannel是一个连接到文件的通道。可以通过文件通道读写文件
-    private AtomicLong[] wrotePositions;//AtomicLong是作用是对长整形进行原子操作   //记录写入位置
+//    private FileChannel[] channels;//FileChannel是一个连接到文件的通道。可以通过文件通道读写文件
+//    private AtomicLong[] wrotePositions;//AtomicLong是作用是对长整形进行原子操作   //记录写入位置
 
     public DefaultQueueStoreImpl() {//初始化类函数
-        channels = new FileChannel[FILE_SIZE];//还未进行对数组中元素的实例化
-        wrotePositions = new AtomicLong[FILE_SIZE];
+//        channels = new FileChannel[FILE_SIZE];//还未进行对数组中元素的实例化
+//        wrotePositions = new AtomicLong[FILE_SIZE];
         bufferManagers = new ConcurrentHashMap<>();
     }
 
