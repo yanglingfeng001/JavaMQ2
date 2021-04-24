@@ -95,7 +95,6 @@ public class BufferManager {//封装缓冲区的一些数据和对缓冲区的�
         buffer.position(0);//缓冲区指到开头
         long curBufIndex = bufIndex.getAndIncrement();//当前的缓冲区索引位置为获取后再自增1
 
-        //这里没有能看懂
         index.add(curBufIndex * buf_size, currentMsgNum-bufferMagNum, bufferMagNum);
         //offset代表索引指向的消息块在文件中存储的位置，startMsg代表此消息r在当前队列中的消息编号，bufferMagNum代表消息大小
 
